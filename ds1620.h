@@ -25,6 +25,9 @@
  * 
  */
 
+#ifndef ds1620
+#define ds1620
+
 //config/status register bits... this could be backwards
 #define DS_CFG_BIT_1SHOT	0
 #define DS_CFG_BIT_CPU		1
@@ -132,4 +135,6 @@ void writeTempHighC(int16_t temp);
  * \param temp Temprature in celcius.
  */
 void writeTempLowC(int16_t temp);
+
+#endif
 
