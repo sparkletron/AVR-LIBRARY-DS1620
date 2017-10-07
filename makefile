@@ -23,7 +23,6 @@ $(ARCHIVE) : $(AVR_OBJECTS)
 	rm -f $<
 
 %.o: %.c
-	@echo $(AVR_CPU_SPEED)
 	$(CROSS_COMPILE)$(CC) $(INCLUDES) $(AVR_CFLAGS) -c $<
 
 clean:
