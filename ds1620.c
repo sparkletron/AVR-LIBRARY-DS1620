@@ -34,7 +34,7 @@
 #define NEGATIVE_MASK		0xFF00
 
 #include <util/delay.h>
-#include <avr/interupt.h>
+#include <avr/interrupt.h>
 #include "ds1620.h"
 
 struct
