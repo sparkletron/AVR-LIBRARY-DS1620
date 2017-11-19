@@ -57,84 +57,84 @@ void initDS1620(volatile uint8_t *port, uint8_t const dataPin, uint8_t const clo
  * Start Temp Conversion
  * 
  */
-void startConversion();
+void startDS1620Conv();
 
 /**
  * Read the temp as a conversion in celcius.
  * 
  * \return Temprature, negative or positive.
  */
-int16_t readTempC();
+int16_t readDS1620TempC();
 
 /**
  * Read the temp as a conversion in F.
  * 
  * \return Temprature, negative or positive.
  */
-int16_t readTempF();
+int16_t readDS1620TempF();
 
 /**
  * Read raw temp data, no manipulation.
  * 
  * \return Temprature, raw data
  */
-int16_t readTempRAW();
+int16_t readDS1620TempRAW();
 
 /**
  * Read the high temp, this is the temp set for the thermostate in C.
  * 
  * \return Temprature, negative or positive.
  */
-int16_t readTempHighC();
+int16_t readDS1620TempHighC();
 
 /**
  * Read the low temp, this is the temp set for the thermostate in C.
  * 
  * \return Temprature, negative or positive.
  */
-int16_t readTempLowC();
+int16_t readDS1620TempLowC();
 
 /**
  * Read counter, can be used for more accurate temps.
  * 
  * \return number of counts (see datasheet).
  */
-int16_t readCounter();
+int16_t readDS1620Counter();
 
 /**
  * Read slope, can be used for more accurate temps.
  * 
  * \return slope number.
  */
-int16_t readSlope();
+int16_t readDS1620Slope();
 
 /**
  * Read a config from the chip
  * 
  * \returns chip config bits
  */
-uint8_t readConfig();
+uint8_t readDS1620Config();
 
 /**
  * Write a config to the chip to change its operation mode.
  * 
  * \param config 
  */
-void writeConfig(uint8_t const config);
+void writeDS1620Config(uint8_t const config);
 
 /**
  * Write the temp to be used for high temp on chip.
  * 
  * \param temp Temprature in celcius.
  */
-void writeTempHighC(int16_t temp);
+void writeDS1620TempHighC(int16_t temp);
 
 /**
  * Write the temp to be used for low temp on chip.
  * 
  * \param temp Temprature in celcius.
  */
-void writeTempLowC(int16_t temp);
+void writeDS1620TempLowC(int16_t temp);
 
 #endif
 

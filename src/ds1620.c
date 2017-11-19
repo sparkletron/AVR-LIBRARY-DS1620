@@ -76,7 +76,7 @@ void initDS1620(volatile uint8_t *port, uint8_t const dataPin, uint8_t const clo
   SREG = tmpSREG;
 }
 
-void startConversion()
+void startDS1620Conv()
 {
   uint8_t tmpSREG = 0;
 
@@ -85,27 +85,27 @@ void startConversion()
 
   readData(CMD_START_CONV, 0);
 
-  if(readConfig() & (1 << DS_CFG_BIT_1SHOT))
+  if(readDS1620Config() & (1 << DS_CFG_BIT_1SHOT))
   {
-    while(!(readConfig() & (1 << DS_CFG_BIT_DONE)));
+    while(!(readDS1620Config() & (1 << DS_CFG_BIT_DONE)));
   }
 
   SREG = tmpSREG;
 }
 
-int16_t readTempC()
+int16_t readDS1620TempC()
 {
   return convertTemp(readData(CMD_READ_TEMP, 9));
 }
 
-int16_t readTempF()
+int16_t readDS1620TempF()
 {
   uint8_t tmpSREG = 0;
 
   tmpSREG = SREG;
   cli();
 
-  int16_t temp = readTempC();
+  int16_t temp = readDS1620TempC();
 
   temp = (9 * temp + 160) / 5;
 
@@ -114,37 +114,37 @@ int16_t readTempF()
   return temp;
 }
 
-int16_t readTempRAW()
+int16_t readDS1620TempRAW()
 {
   return readData(CMD_READ_TEMP, 9);
 }
 
-int16_t readTempHighC()
+int16_t readDS1620TempHighC()
 {
   return convertTemp(readData(CMD_READ_H_TEMP, 9));
 }
 
-int16_t readTempLowC()
+int16_t readDS1620TempLowC()
 {
   return convertTemp(readData(CMD_READ_L_TEMP, 9));
 }
 
-int16_t readCounter()
+int16_t readDS1620Counter()
 {
   return readData(CMD_READ_COUNTER, 8);
 }
 
-int16_t readSlope()
+int16_t readDS1620Slope()
 {
   return readData(CMD_READ_SLOPE, 8);
 }
 
-uint8_t readConfig()
+uint8_t readDS1620Config()
 {
   return readData(CMD_READ_CONFIG, 8);
 }
 
-void writeConfig(uint8_t const config)
+void writeDS1620Config(uint8_t const config)
 {
   uint8_t tmpSREG = 0;
 
@@ -157,7 +157,7 @@ void writeConfig(uint8_t const config)
   SREG = tmpSREG;
 }
 
-void writeTempHighC(int16_t temp)
+void writeDS1620TempHighC(int16_t temp)
 {
   uint8_t tmpSREG = 0;
 
@@ -170,7 +170,7 @@ void writeTempHighC(int16_t temp)
   SREG = tmpSREG;
 }
 
-void writeTempLowC(int16_t temp)
+void writeDS1620TempLowC(int16_t temp)
 {
   uint8_t tmpSREG = 0;
 
