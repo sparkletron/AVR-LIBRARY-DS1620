@@ -42,6 +42,16 @@
 
 #include <inttypes.h>
 
+struct s_ds1620
+{
+  volatile uint8_t *PORT;
+  volatile uint8_t *DDR;
+  volatile uint8_t *PIN;
+  uint8_t dataPin;
+  uint8_t clockPin;
+  uint8_t resetPin;
+};
+
 /**
  * initDS1620 sets up DS1620 for single conversion mode.
  * 
@@ -49,92 +59,123 @@
  * \param dataPin The bit(i/o pin) number to use for data i/o
  * \param clockPin The bit(i/o pin) number to use for clock generation.
  * \param resetPin The bit(i/o pin) number to use for reset generation.
+ * 
+ * \return Struct that contains info about the sensor.
  */
-void initDS1620(volatile uint8_t *port, uint8_t const dataPin, uint8_t const clockPin, uint8_t const resetPin);
+struct s_ds1620 *initDS1620(volatile uint8_t *port, uint8_t const dataPin, uint8_t const clockPin, uint8_t const resetPin);
 
 /**
  * 
  * Start Temp Conversion
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  */
-void startDS1620Conv();
+void startDS1620Conv(struct s_ds1620 *p_ds1620);
 
 /**
  * Read the temp as a conversion in celcius.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \return Temprature, negative or positive.
  */
-int16_t readDS1620TempC();
+int16_t readDS1620TempC(struct s_ds1620 *p_ds1620);
 
 /**
  * Read the temp as a conversion in F.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \return Temprature, negative or positive.
  */
-int16_t readDS1620TempF();
+int16_t readDS1620TempF(struct s_ds1620 *p_ds1620);
 
 /**
  * Read raw temp data, no manipulation.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \return Temprature, raw data
  */
-int16_t readDS1620TempRAW();
+int16_t readDS1620TempRAW(struct s_ds1620 *p_ds1620);
 
 /**
  * Read the high temp, this is the temp set for the thermostate in C.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \return Temprature, negative or positive.
  */
-int16_t readDS1620TempHighC();
+int16_t readDS1620TempHighC(struct s_ds1620 *p_ds1620);
 
 /**
  * Read the low temp, this is the temp set for the thermostate in C.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \return Temprature, negative or positive.
  */
-int16_t readDS1620TempLowC();
+int16_t readDS1620TempLowC(struct s_ds1620 *p_ds1620);
 
 /**
  * Read counter, can be used for more accurate temps.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \return number of counts (see datasheet).
  */
-int16_t readDS1620Counter();
+int16_t readDS1620Counter(struct s_ds1620 *p_ds1620);
 
 /**
  * Read slope, can be used for more accurate temps.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \return slope number.
  */
-int16_t readDS1620Slope();
+int16_t readDS1620Slope(struct s_ds1620 *p_ds1620);
 
 /**
  * Read a config from the chip
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
  * \returns chip config bits
  */
-uint8_t readDS1620Config();
+uint8_t readDS1620Config(struct s_ds1620 *p_ds1620);
 
 /**
  * Write a config to the chip to change its operation mode.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
  * \param config 
  */
-void writeDS1620Config(uint8_t const config);
+void writeDS1620Config(struct s_ds1620 *p_ds1620, uint8_t const config);
 
 /**
  * Write the temp to be used for high temp on chip.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
  * \param temp Temprature in celcius.
  */
-void writeDS1620TempHighC(int16_t temp);
+void writeDS1620TempHighC(struct s_ds1620 *p_ds1620, int16_t temp);
 
 /**
  * Write the temp to be used for low temp on chip.
  * 
+ * \param p_ds1620 struct that contains the sensor needed.
  * \param temp Temprature in celcius.
  */
-void writeDS1620TempLowC(int16_t temp);
+void writeDS1620TempLowC(struct s_ds1620 *p_ds1620, int16_t temp);
+
+/**
+ * Free struct that contains DS1620 info
+ * 
+ * \param p_ds1620 struct that contains the sensor needed.
+ * 
+ */
+void freeDS1620(struct s_ds1620 *p_ds1620);
 
 #endif
 

@@ -35,77 +35,83 @@
 
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
 #include "ds1620.h"
 
-struct
-{
-  volatile uint8_t *PORT;
-  volatile uint8_t *DDR;
-  volatile uint8_t *PIN;
-  uint8_t dataPin;
-  uint8_t clockPin;
-  uint8_t resetPin;
-} g_ds1620;
-
 //helper functions
-void writeData(uint8_t command, int16_t data, uint8_t amount);
-int16_t readData(uint8_t command, uint8_t amount);
+void writeData(struct s_ds1620 *p_ds1620, uint8_t command, int16_t data, uint8_t amount);
+int16_t readData(struct s_ds1620 *p_ds1620, uint8_t command, uint8_t amount);
 int16_t convertTemp(int16_t temp);
 
-void initDS1620(volatile uint8_t *port, uint8_t const dataPin, uint8_t const clockPin, uint8_t const resetPin)
+struct s_ds1620 *initDS1620(volatile uint8_t *port, uint8_t const dataPin, uint8_t const clockPin, uint8_t const resetPin)
 {
   uint8_t tmpSREG = 0;
-
+	struct s_ds1620 *p_temp = NULL;
+	
   tmpSREG = SREG;
   cli();
 
-  g_ds1620.PORT = port;
-  g_ds1620.DDR = port - 1;
-  g_ds1620.PIN = port - 2;
+	p_temp = malloc(sizeof(struct s_ds1620));
+	
+	if(p_temp == NULL) return NULL;
+	
+  p_temp->PORT = port;
+  p_temp->DDR = port - 1;
+  p_temp->PIN = port - 2;
 
-  g_ds1620.dataPin = dataPin;
-  g_ds1620.clockPin = clockPin;
-  g_ds1620.resetPin = resetPin;
+  p_temp->dataPin = dataPin;
+  p_temp->clockPin = clockPin;
+  p_temp->resetPin = resetPin;
 
-  *g_ds1620.DDR |= (1 << g_ds1620.clockPin) | (1 << g_ds1620.dataPin) | (1 << g_ds1620.resetPin);
+  *p_temp->DDR |= (1 << p_temp->clockPin) | (1 << p_temp->dataPin) | (1 << p_temp->resetPin);
 
-  *g_ds1620.PORT |= (1 << g_ds1620.clockPin) | (1 << g_ds1620.dataPin);
+  *p_temp->PORT |= (1 << p_temp->clockPin) | (1 << p_temp->dataPin);
 
-  *g_ds1620.PORT &= ~(1 << g_ds1620.resetPin);
+  *p_temp->PORT &= ~(1 << p_temp->resetPin);
 
   SREG = tmpSREG;
+	
+	sei();
+	
+	return p_temp;
 }
 
-void startDS1620Conv()
+void startDS1620Conv(struct s_ds1620 *p_ds1620)
 {
   uint8_t tmpSREG = 0;
+	
+	if(p_ds1620 == NULL) return;
 
   tmpSREG = SREG;
   cli();
 
-  readData(CMD_START_CONV, 0);
+  readData(p_ds1620, CMD_START_CONV, 0);
 
-  if(readDS1620Config() & (1 << DS_CFG_BIT_1SHOT))
+  if(readDS1620Config(p_ds1620) & (1 << DS_CFG_BIT_1SHOT))
   {
-    while(!(readDS1620Config() & (1 << DS_CFG_BIT_DONE)));
+    while(!(readDS1620Config(p_ds1620) & (1 << DS_CFG_BIT_DONE)));
   }
 
   SREG = tmpSREG;
 }
 
-int16_t readDS1620TempC()
+int16_t readDS1620TempC(struct s_ds1620 *p_ds1620)
 {
-  return convertTemp(readData(CMD_READ_TEMP, 9));
+	if(p_ds1620 == NULL) return 0;
+	
+  return convertTemp(readData(p_ds1620, CMD_READ_TEMP, 9));
 }
 
-int16_t readDS1620TempF()
+int16_t readDS1620TempF(struct s_ds1620 *p_ds1620)
 {
   uint8_t tmpSREG = 0;
 
+	if(p_ds1620 == NULL) return 0;
+	
   tmpSREG = SREG;
   cli();
 
-  int16_t temp = readDS1620TempC();
+  int16_t temp = readDS1620TempC(p_ds1620);
 
   temp = (9 * temp + 160) / 5;
 
@@ -114,73 +120,98 @@ int16_t readDS1620TempF()
   return temp;
 }
 
-int16_t readDS1620TempRAW()
+int16_t readDS1620TempRAW(struct s_ds1620 *p_ds1620)
 {
-  return readData(CMD_READ_TEMP, 9);
+	if(p_ds1620 == NULL) return 0;
+	
+  return readData(p_ds1620, CMD_READ_TEMP, 9);
 }
 
-int16_t readDS1620TempHighC()
+int16_t readDS1620TempHighC(struct s_ds1620 *p_ds1620)
 {
-  return convertTemp(readData(CMD_READ_H_TEMP, 9));
+	if(p_ds1620 == NULL) return 0;
+	
+  return convertTemp(readData(p_ds1620, CMD_READ_H_TEMP, 9));
 }
 
-int16_t readDS1620TempLowC()
+int16_t readDS1620TempLowC(struct s_ds1620 *p_ds1620)
 {
-  return convertTemp(readData(CMD_READ_L_TEMP, 9));
+	if(p_ds1620 == NULL) return 0;
+	
+  return convertTemp(readData(p_ds1620, CMD_READ_L_TEMP, 9));
 }
 
-int16_t readDS1620Counter()
+int16_t readDS1620Counter(struct s_ds1620 *p_ds1620)
 {
-  return readData(CMD_READ_COUNTER, 8);
+	if(p_ds1620 == NULL) return 0;
+	
+  return readData(p_ds1620, CMD_READ_COUNTER, 8);
 }
 
-int16_t readDS1620Slope()
+int16_t readDS1620Slope(struct s_ds1620 *p_ds1620)
 {
-  return readData(CMD_READ_SLOPE, 8);
+	if(p_ds1620 == NULL) return 0;
+	
+  return readData(p_ds1620, CMD_READ_SLOPE, 8);
 }
 
-uint8_t readDS1620Config()
+uint8_t readDS1620Config(struct s_ds1620 *p_ds1620)
 {
-  return readData(CMD_READ_CONFIG, 8);
+	if(p_ds1620 == NULL) return 0;
+	
+  return readData(p_ds1620, CMD_READ_CONFIG, 8);
 }
 
-void writeDS1620Config(uint8_t const config)
+void writeDS1620Config(struct s_ds1620 *p_ds1620, uint8_t const config)
 {
   uint8_t tmpSREG = 0;
 
+	if(p_ds1620 == NULL) return;
+	
   tmpSREG = SREG;
   cli();
 
-  writeData(CMD_WRITE_CONFIG, config, 8);
+  writeData(p_ds1620, CMD_WRITE_CONFIG, config, 8);
   _delay_ms(WRITE_DELAY);
 
   SREG = tmpSREG;
 }
 
-void writeDS1620TempHighC(int16_t temp)
+void writeDS1620TempHighC(struct s_ds1620 *p_ds1620, int16_t temp)
 {
   uint8_t tmpSREG = 0;
 
+	if(p_ds1620 == NULL) return;
+	
   tmpSREG = SREG;
   cli();
 
   temp <<= 1;
-  writeData(CMD_WRITE_H_TEMP, temp, 9);
+  writeData(p_ds1620, CMD_WRITE_H_TEMP, temp, 9);
 
   SREG = tmpSREG;
 }
 
-void writeDS1620TempLowC(int16_t temp)
+void writeDS1620TempLowC(struct s_ds1620 *p_ds1620, int16_t temp)
 {
   uint8_t tmpSREG = 0;
 
+	if(p_ds1620 == NULL) return;
+	
   tmpSREG = SREG;
   cli();
 
   temp <<= 1;
-  writeData(CMD_WRITE_L_TEMP, temp, 9);
+  writeData(p_ds1620, CMD_WRITE_L_TEMP, temp, 9);
 
   SREG = tmpSREG;
+}
+
+void freeDS1620(struct s_ds1620 *p_ds1620)
+{
+	if(p_ds1620 == NULL) return;
+	
+	free(p_ds1620);
 }
 
 //helper functions
@@ -191,47 +222,49 @@ void writeDS1620TempLowC(int16_t temp)
  * \param data Data to write to the register (command data).
  * \param amount Number of bits the data contains (8 or 9).
  */
-void writeData(uint8_t command, int16_t data, uint8_t amount)
+void writeData(struct s_ds1620 *p_ds1620, uint8_t command, int16_t data, uint8_t amount)
 {
   int index;
   uint8_t tmpSREG = 0;
+	
+	if(p_ds1620 == NULL) return;
 
   tmpSREG = SREG;
   cli();
 
-  *g_ds1620.PORT |= (1 << g_ds1620.resetPin);
+  *p_ds1620->PORT |= (1 << p_ds1620->resetPin);
 
   _delay_us(DUTY_PERIOD);
 
-  *g_ds1620.PORT |= (1 << g_ds1620.clockPin);
+  *p_ds1620->PORT |= (1 << p_ds1620->clockPin);
 
-  *g_ds1620.DDR |= (1 << g_ds1620.dataPin);
+  *p_ds1620->DDR |= (1 << p_ds1620->dataPin);
 
   for(index = 0; index < COMMAND_LENGTH; index++)
   {
-    *g_ds1620.PORT |= ((command & (1 << index)) >> index) << g_ds1620.dataPin;
-    *g_ds1620.PORT &= (((command & (1 << index)) >> index) << g_ds1620.dataPin) | ~(1 << g_ds1620.dataPin);
+    *p_ds1620->PORT |= ((command & (1 << index)) >> index) << p_ds1620->dataPin;
+    *p_ds1620->PORT &= (((command & (1 << index)) >> index) << p_ds1620->dataPin) | ~(1 << p_ds1620->dataPin);
 
-    *g_ds1620.PORT &= ~(1 << g_ds1620.clockPin);
+    *p_ds1620->PORT &= ~(1 << p_ds1620->clockPin);
     _delay_us(DUTY_PERIOD);
-    *g_ds1620.PORT |= 1 << g_ds1620.clockPin;
+    *p_ds1620->PORT |= 1 << p_ds1620->clockPin;
     _delay_us(DUTY_PERIOD);
   }
 
   for(index = 0; index < amount; index++)
   {
-    *g_ds1620.PORT |= ((data & (1 << index)) >> index) << g_ds1620.dataPin;
-    *g_ds1620.PORT &= (((data & (1 << index)) >> index) << g_ds1620.dataPin) | ~(1 << g_ds1620.dataPin);
+    *p_ds1620->PORT |= ((data & (1 << index)) >> index) << p_ds1620->dataPin;
+    *p_ds1620->PORT &= (((data & (1 << index)) >> index) << p_ds1620->dataPin) | ~(1 << p_ds1620->dataPin);
 
-    *g_ds1620.PORT &= ~(1 << g_ds1620.clockPin);
+    *p_ds1620->PORT &= ~(1 << p_ds1620->clockPin);
     _delay_us(DUTY_PERIOD);
-    *g_ds1620.PORT |= 1 << g_ds1620.clockPin;
+    *p_ds1620->PORT |= 1 << p_ds1620->clockPin;
     _delay_us(DUTY_PERIOD);
   }
 
   if(amount != 0)
   {
-    *g_ds1620.PORT &= ~(1 << g_ds1620.resetPin);
+    *p_ds1620->PORT &= ~(1 << p_ds1620->resetPin);
   }
 
   SREG = tmpSREG;
@@ -244,36 +277,38 @@ void writeData(uint8_t command, int16_t data, uint8_t amount)
  * \param amount Number of bits the data contains (8 or 9).
  * \return 16 bits worth of data.
  */
-int16_t readData(uint8_t command, uint8_t amount)
+int16_t readData(struct s_ds1620 *p_ds1620, uint8_t command, uint8_t amount)
 {
   int index;
   int16_t data = 0;
   uint8_t tmpSREG = 0;
+	
+	if(p_ds1620 == NULL) return 0;
 
   tmpSREG = SREG;
   cli();
 
-  *g_ds1620.PORT |= (1 << g_ds1620.clockPin);
+  *p_ds1620->PORT |= (1 << p_ds1620->clockPin);
 
-  writeData(command, 0, 0);
+  writeData(p_ds1620, command, 0, 0);
 
-  *g_ds1620.DDR &= ~(1 << g_ds1620.dataPin);
-  *g_ds1620.PORT &= ~(1 << g_ds1620.dataPin);
+  *p_ds1620->DDR &= ~(1 << p_ds1620->dataPin);
+  *p_ds1620->PORT &= ~(1 << p_ds1620->dataPin);
 
   for(index = 0; index < amount; index++)
   {
-    *g_ds1620.PORT &= ~(1 << g_ds1620.clockPin);
+    *p_ds1620->PORT &= ~(1 << p_ds1620->clockPin);
 
     _delay_us(DUTY_PERIOD);
 
-    *g_ds1620.PORT |= 1 << g_ds1620.clockPin;
+    *p_ds1620->PORT |= 1 << p_ds1620->clockPin;
 
-    data |= (((*g_ds1620.PIN >> g_ds1620.dataPin) & 1) << index);
+    data |= (((*p_ds1620->PIN >> p_ds1620->dataPin) & 1) << index);
 
     _delay_us(DUTY_PERIOD);
   }
 
-  *g_ds1620.PORT &= ~(1 << g_ds1620.resetPin);
+  *p_ds1620->PORT &= ~(1 << p_ds1620->resetPin);
 
   SREG = tmpSREG;
 
@@ -289,7 +324,7 @@ int16_t readData(uint8_t command, uint8_t amount)
 int16_t convertTemp(int16_t temp)
 {
   uint8_t tmpSREG = 0;
-
+	
   tmpSREG = SREG;
   cli();
 
