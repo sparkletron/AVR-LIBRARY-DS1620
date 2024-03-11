@@ -1,29 +1,36 @@
-/**
- * 
- * \brief Library for interfacing with the DS1620 temprature chip.
+/*******************************************************************************
+ * @file    ds16209.h
+ * @brief   Library for interfacing with the DS1620 temprature chip.
+ * @author  Jay Convertino(electrobs@gmail.com)
+ * @date    2017.05.02
+ * @details NONE
+ * @version 0.0.1
  *
- * \author John Convertino (electrobs@gmail.com)
- * \date 05/02/17
- * 
-    Copyright (C) 2017 John Convertino
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- * 
- * \version 0.1
- * 
- */
+ * @TODO
+ *  - Add in a better way to enable/disable delay setting
+ *
+ * @license mit
+ *
+ * Copyright 2024 Johnathan Convertino
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ ******************************************************************************/
 
 #ifndef ds1620
 #define ds1620
@@ -55,14 +62,13 @@ struct s_ds1620
 /**
  * initDS1620 sets up DS1620 for single conversion mode.
  * 
+ * \param p_temp s_ds1620 struct to store data.
  * \param port The data port to use on the atmega328p for all 3 i/o pins.
  * \param dataPin The bit(i/o pin) number to use for data i/o
  * \param clockPin The bit(i/o pin) number to use for clock generation.
  * \param resetPin The bit(i/o pin) number to use for reset generation.
- * 
- * \return Struct that contains info about the sensor.
  */
-struct s_ds1620 *initDS1620(volatile uint8_t *port, uint8_t const dataPin, uint8_t const clockPin, uint8_t const resetPin);
+void initDS1620(struct s_ds1620 *p_temp, volatile uint8_t *port, uint8_t const dataPin, uint8_t const clockPin, uint8_t const resetPin);
 
 /**
  * 
@@ -168,14 +174,6 @@ void writeDS1620TempHighC(struct s_ds1620 *p_ds1620, int16_t temp);
  * \param temp Temprature in celcius.
  */
 void writeDS1620TempLowC(struct s_ds1620 *p_ds1620, int16_t temp);
-
-/**
- * Free struct that contains DS1620 info
- * 
- * \param p_ds1620 struct that contains the sensor needed.
- * 
- */
-void freeDS1620(struct s_ds1620 *p_ds1620);
 
 #endif
 
